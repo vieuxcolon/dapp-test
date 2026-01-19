@@ -15,7 +15,6 @@ RUN apt-get update && apt-get install -y \
     git \
     build-essential \
     ca-certificates \
-    expect \
     && rm -rf /var/lib/apt/lists/*
 
 # ----------------------------
@@ -28,48 +27,27 @@ RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
 # ----------------------------
 # 3. Install Hardhat globally
 # ----------------------------
-RUN npm install -g hardhat@3.1.4
+RUN npm install -g hardhat@3.1.5
 
 # ----------------------------
-# 4. Copy repo (contracts already exist)
+# 4. Copy repo (only InvestmentDAO.sol is required)
 # ----------------------------
 COPY . /app
 
 # ----------------------------
-# 5. Automate `hardhat --init`
-#    (minimal project, no overwrite, install deps)
+# 5. NON-INTERACTIVE Hardhat init (CRITICAL)
 # ----------------------------
-RUN expect <<'EOF'
-set timeout -1
-spawn hardhat --init
-
-expect "Which version of Hardhat would you like to use?"
-send "\r"
-
-expect "Please provide either a relative or an absolute path:"
-send "\r"
-
-expect "What type of project would you like to initialize?"
-send "\033[B\033[B\r"   ;# scroll down twice → "A minimal Hardhat project"
-
-expect "Do you want to overwrite them?"
-send "\r"                ;# false (default)
-
-expect "Do you want to run it now?"
-send "\r"                ;# true (default)
-
-expect eof
-EOF
+RUN npx hardhat init \
+    --template minimal \
+    --yes \
+    --force
 
 # ----------------------------
-# 6. FIRST compile (critical!)
-#    Downloads solc 0.8.28 and seals project
+# 6. First compile (locks solc 0.8.28)
 # ----------------------------
 RUN npx hardhat compile
 
 # ----------------------------
-# 7. Default command
-#    run-all.sh is now safe & deterministic
+# 7. Ready for run-all.sh
 # ----------------------------
 CMD ["bash"]
-
