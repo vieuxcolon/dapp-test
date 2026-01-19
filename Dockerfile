@@ -1,53 +1,54 @@
-# ============================
-# Hardhat 3.x reproducible env
-# ============================
-
 FROM ubuntu:22.04
-
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /app
 
-# ----------------------------
-# 1. System dependencies
-# ----------------------------
+# System deps
 RUN apt-get update && apt-get install -y \
-    curl \
-    git \
-    build-essential \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+  curl git build-essential ca-certificates expect \
+  && rm -rf /var/lib/apt/lists/*
 
-# ----------------------------
-# 2. Node.js 22.x + npm
-# ----------------------------
+# Node 22 + npm
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g npm@10.9.4
+  && apt-get install -y nodejs \
+  && npm install -g npm@10.9.4
 
-# ----------------------------
-# 3. Install Hardhat globally
-# ----------------------------
-RUN npm install -g hardhat@3.1.5
+# Hardhat
+RUN npm install -g hardhat@3.1.4
 
-# ----------------------------
-# 4. Copy repo (only InvestmentDAO.sol is required)
-# ----------------------------
+# Copy repo (only InvestmentDAO.sol is required)
 COPY . /app
 
-# ----------------------------
-# 5. NON-INTERACTIVE Hardhat init (CRITICAL)
-# ----------------------------
-RUN npx hardhat init \
-    --template minimal \
-    --yes \
-    --force
+# Hardhat init (automated)
+RUN expect <<'EOF'
+set timeout -1
+spawn hardhat --init
 
-# ----------------------------
-# 6. First compile (locks solc 0.8.28)
-# ----------------------------
+expect -re "Which version of Hardhat"
+send "\r"
+
+expect -re "relative or an absolute path"
+send "\r"
+
+expect -re "What type of project would you like to initialize"
+expect -re "A minimal Hardhat project"
+send "\x1b[B"
+send "\x1b[B"
+send "\r"
+
+expect {
+  -re "overwrite" {
+    send "\r"
+    exp_continue
+  }
+  -re "run it now" {
+    send "\r"
+  }
+}
+
+expect eof
+EOF
+
+# First compile (downloads solc, seals project)
 RUN npx hardhat compile
 
-# ----------------------------
-# 7. Ready for run-all.sh
-# ----------------------------
 CMD ["bash"]
