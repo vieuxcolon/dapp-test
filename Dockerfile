@@ -36,18 +36,6 @@ RUN npm install -g hardhat@3.1.4
 COPY . /app
 
 # ----------------------------
-# 5. INTERACTIVE hardhat --init
-#    (manual completion)
-# ----------------------------
-# RUN hardhat --init
-
-# ----------------------------
-# 6. FIRST compile (critical)
-#    Downloads solc 0.8.28
-# ----------------------------
-RUN npx hardhat compile
-
-# ----------------------------
-# 7. Default command
+# 5. Default command
 # ----------------------------
 CMD ["bash"]
