@@ -1,4 +1,4 @@
 # How to launch
-docker build -t hardhat-init .
-docker run -it --rm hardhat-init
-
+docker build -t hardhat-env .
+docker run -it  hardhat-env
+./run-all.sh
