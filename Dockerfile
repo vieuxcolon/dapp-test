@@ -1,5 +1,6 @@
 # ============================
 # Hardhat 3.x reproducible env
+# Interactive init version
 # ============================
 
 FROM ubuntu:22.04
@@ -15,7 +16,6 @@ RUN apt-get update && apt-get install -y \
     git \
     build-essential \
     ca-certificates \
-    expect \
     && rm -rf /var/lib/apt/lists/*
 
 # ----------------------------
@@ -36,25 +36,6 @@ RUN npm install -g hardhat@3.1.4
 COPY . /app
 
 # ----------------------------
-# 5. INTERACTIVE hardhat --init
-#    (expect used ONLY for PTY)
+# 5. Run init, then keep shell alive
 # ----------------------------
-RUN expect <<'EOF'
-set timeout -1
-log_user 1
-
-spawn hardhat --init
-
-interact
-EOF
-
-# ----------------------------
-# 6. FIRST compile (critical)
-#    Downloads solc 0.8.28
-# ----------------------------
-RUN npx hardhat compile
-
-# ----------------------------
-# 7. Default command
-# ----------------------------
-CMD ["bash"]
+CMD ["bash", "-lc", "hardhat --init && exec bash"]
