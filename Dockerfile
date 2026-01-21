@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y \
     git \
     build-essential \
     ca-certificates \
+    expect \
     && rm -rf /var/lib/apt/lists/*
 
 # ----------------------------
@@ -36,9 +37,16 @@ COPY . /app
 
 # ----------------------------
 # 5. INTERACTIVE hardhat --init
-#    (manual completion)
+#    (expect used ONLY for PTY)
 # ----------------------------
-RUN hardhat --init
+RUN expect <<'EOF'
+set timeout -1
+log_user 1
+
+spawn hardhat --init
+
+interact
+EOF
 
 # ----------------------------
 # 6. FIRST compile (critical)
