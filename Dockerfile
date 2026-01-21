@@ -1,6 +1,5 @@
 # ============================
 # Hardhat 3.x reproducible env
-# Interactive init version
 # ============================
 
 FROM ubuntu:22.04
@@ -36,7 +35,18 @@ RUN npm install -g hardhat@3.1.4
 COPY . /app
 
 # ----------------------------
-# 5. Default command:
-#    interactive Hardhat init
+# 5. INTERACTIVE hardhat --init
+#    (manual completion)
 # ----------------------------
-CMD ["hardhat", "--init"]
+RUN hardhat --init
+
+# ----------------------------
+# 6. FIRST compile (critical)
+#    Downloads solc 0.8.28
+# ----------------------------
+RUN npx hardhat compile
+
+# ----------------------------
+# 7. Default command
+# ----------------------------
+CMD ["bash"]
